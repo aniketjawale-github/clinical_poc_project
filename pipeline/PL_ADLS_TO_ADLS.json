@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "PL_ADLS_TO_ADLS CSV",
+				"name": "PL_ADLS_TO_ADLS",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
