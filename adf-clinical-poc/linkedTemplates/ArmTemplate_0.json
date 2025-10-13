@@ -628,7 +628,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy_MySQL_to_ADLS_CSV",
+						"name": "Copy_MySQL_to_ADLS",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
