@@ -45,13 +45,13 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/MySQL_to_ADLS CSV')]",
+			"name": "[concat(parameters('factoryName'), '/MySQL_to_ADLS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy_MySQL_to_ADLS",
+						"name": "MySQL_to_ADLS",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -220,7 +220,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "PL_ADLS_TO_ADLS CSV",
+						"name": "PL_ADLS_TO_ADLS",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
