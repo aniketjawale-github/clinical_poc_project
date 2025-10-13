@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-clinical-poc"
+		},
+		"ls_adls_clinical_poc_accountKey": {
+			"value": ""
+		},
+		"ls_mysql_local_password": {
+			"value": ""
+		},
+		"ls_ADLS_DATASOURCE_properties_typeProperties_url": {
+			"value": "https://adlsclinicalpoc.dfs.core.windows.net/"
+		},
+		"ls_adls_clinical_poc_properties_typeProperties_url": {
+			"value": "https://adlsclinicalpoc.dfs.core.windows.net/"
+		},
+		"ls_mysql_local_properties_typeProperties_server": {
+			"value": "localhost"
+		},
+		"ls_mysql_local_properties_typeProperties_database": {
+			"value": "clinical_db"
+		},
+		"ls_mysql_local_properties_typeProperties_username": {
+			"value": "root"
+		},
+		"ls_rest_clinical_api_poc_properties_typeProperties_url": {
+			"value": "https://clinical-api-poc.azurewebsites.net"
+		}
+	}
+}
