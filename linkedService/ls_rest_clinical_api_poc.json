@@ -1,0 +1,13 @@
+{
+	"name": "ls_rest_clinical_api_poc",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://clinical-api-poc.azurewebsites.net",
+			"enableServerCertificateValidation": false,
+			"authenticationType": "Anonymous"
+		}
+	}
+}

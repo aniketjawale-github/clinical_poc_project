@@ -1,0 +1,11 @@
+{
+	"name": "ls_ADLS_DATASOURCE",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://adlsclinicalpoc.dfs.core.windows.net/"
+		}
+	}
+}
