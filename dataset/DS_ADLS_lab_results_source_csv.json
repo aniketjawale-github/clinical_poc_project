@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "lab_results_raw.csv",
-				"folderPath": "landing",
+				"folderPath": "adls_lab_result_manual",
 				"fileSystem": "bronze"
 			},
 			"columnDelimiter": ",",
