@@ -531,6 +531,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileName": "lab_results_raw.csv",
 						"folderPath": "clinical",
 						"fileSystem": "bronze"
 					},
