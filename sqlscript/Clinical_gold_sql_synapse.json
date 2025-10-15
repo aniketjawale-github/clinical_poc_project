@@ -1,0 +1,17 @@
+{
+	"name": "Clinical_gold_sql_synapse",
+	"properties": {
+		"content": {
+			"query": "-- A) Use (or create) a DB for your external tables\nCREATE DATABASE clinical_gold;\nUSE clinical_gold;\n\n--Master Key\nCREATE MASTER KEY ENCRYPTION \nBY PASSWORD = 'abc123@';\n\n-- B) Let this DB use the workspace Managed Identity to access ADLS\nCREATE DATABASE SCOPED CREDENTIAL ADLS_MI\nWITH IDENTITY = 'Managed Identity';\n\n-- C) Point to your ADLS Gen2 Gold container (no keys in code)\nCREATE EXTERNAL DATA SOURCE ADLS_GOLD\nWITH (\n    LOCATION   = 'abfss://gold@adlsclinicalpoc.dfs.core.windows.net',\n    CREDENTIAL = ADLS_MI\n);\n\n-- D) Parquet file format\nCREATE EXTERNAL FILE FORMAT ParquetFormat\nWITH ( FORMAT_TYPE = PARQUET );\n\n-- Subject risk summary\nCREATE SCHEMA gold;\n\n\nCREATE EXTERNAL TABLE gold.subject_risk_summary\n(\n    subject_id             VARCHAR(100),\n    arm                    VARCHAR(100),\n    num_high_results       INT,\n    num_low_results        INT,\n    num_adverse_events     INT,\n    total_clinical_events  INT\n)\nWITH (\n    LOCATION    = '/subject_risk_summary/',   -- folder in gold container\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n-- Demographics\nCREATE EXTERNAL TABLE gold.demographics_summary\n(\n    arm      VARCHAR(100),\n    sex      VARCHAR(50),\n    country  VARCHAR(100),\n    [count]  BIGINT\n)\nWITH (\n    LOCATION    = '/demographics_summary/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n-- Lab efficiency\nCREATE EXTERNAL TABLE gold.lab_efficiency\n(\n    test_name                 VARCHAR(200),\n    avg_collection_delay_days FLOAT,\n    avg_result_delay_days     FLOAT\n)\nWITH (\n    LOCATION    = '/lab_efficiency/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n-- AE summary\nCREATE EXTERNAL TABLE gold.ae_summary\n(\n    arm       VARCHAR(100),\n    severity  VARCHAR(50),\n    ae_count  BIGINT\n)\nWITH (\n    LOCATION    = '/ae_summary/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n-- Efficacy change (example)\nCREATE EXTERNAL TABLE gold.efficacy_change\n(\n    subject_id  VARCHAR(100),\n    arm         VARCHAR(100),\n    min_result  FLOAT,\n    max_result  FLOAT,\n    [change]    FLOAT\n)\nWITH (\n    LOCATION    = '/efficacy_change/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n\nSELECT TOP 100 * FROM gold.subject_risk_summary;\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "clinical_gold",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
