@@ -1,0 +1,897 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "clinical-poc-synapse"
+		},
+		"clinical-poc-synapse-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'clinical-poc-synapse-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:clinical-poc-synapse.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"ls_adls_clinical_poc_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_adls_clinical_poc'"
+		},
+		"ls_mysql_local_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'ls_mysql_local'"
+		},
+		"clinical-poc-synapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsclinicalpoc.dfs.core.windows.net"
+		},
+		"ls_ADLS_DATASOURCE_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsclinicalpoc.dfs.core.windows.net/"
+		},
+		"ls_adls_clinical_poc_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsclinicalpoc.dfs.core.windows.net/"
+		},
+		"ls_mysql_local_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "localhost"
+		},
+		"ls_mysql_local_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "clinical_db"
+		},
+		"ls_mysql_local_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "root"
+		},
+		"ls_rest_clinical_api_poc_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://clinical-api-poc.azurewebsites.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/MySQL_to_ADLS')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "MySQL_to_ADLS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "MySqlSource",
+								"query": "SELECT subject_id, trial_id, site_id, enrollment_date, arm, sex, dob, country\nFROM clinical_db.db_trial_subjects;"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "subject_id",
+											"type": "String",
+											"physicalType": "VarChar"
+										},
+										"sink": {
+											"name": "subject_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "trial_id",
+											"type": "String",
+											"physicalType": "VarChar"
+										},
+										"sink": {
+											"name": "trial_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "site_id",
+											"type": "String",
+											"physicalType": "VarChar"
+										},
+										"sink": {
+											"name": "site_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "enrollment_date",
+											"type": "DateTime",
+											"physicalType": "Date"
+										},
+										"sink": {
+											"name": "enrollment_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "arm",
+											"type": "String",
+											"physicalType": "VarChar"
+										},
+										"sink": {
+											"name": "arm",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "sex",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "sex",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "dob",
+											"type": "DateTime",
+											"physicalType": "Date"
+										},
+										"sink": {
+											"name": "dob",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "country",
+											"type": "String",
+											"physicalType": "VarChar"
+										},
+										"sink": {
+											"name": "country",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_MySQL_source_db_trial_subjects",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_sink_db_trial_subjects",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-10-12T16:37:00Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/DS_MySQL_source_db_trial_subjects')]",
+				"[concat(variables('workspaceId'), '/datasets/DS_ADLS_sink_db_trial_subjects')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PL_ADLS_TO_ADLS')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_ADLS_TO_ADLS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "lab_result_id",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "lab_result_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "subject_id",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "subject_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "encounter_id",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "encounter_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "order_datetime_utc",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "order_datetime_utc",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "collected_datetime_utc",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "collected_datetime_utc",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "result_datetime_utc",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "result_datetime_utc",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "loinc_code",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "loinc_code",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "test_name",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "test_name",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "result_value",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "result_value",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "unit",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "unit",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "abnormal_flag",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "abnormal_flag",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "status",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "status",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "lab_vendor",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "lab_vendor",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_ADLS_lab_results_source_csv",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_Lab_results_Sink",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-10-12T16:37:00Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/DS_ADLS_lab_results_source_csv')]",
+				"[concat(variables('workspaceId'), '/datasets/DS_ADLS_Lab_results_Sink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PL_API_TO_ADLS')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_API_TO _ADLS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_Rest_clinical_api_source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_adls_clinical_api_sink",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-10-12T16:37:00Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_Rest_clinical_api_source')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_adls_clinical_api_sink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_ADLS_Lab_results_Sink')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_ADLS_DATASOURCE",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "lab_results_raw.csv",
+						"folderPath": "adls_lab_results",
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_ADLS_DATASOURCE')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_ADLS_lab_results_source_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_ADLS_DATASOURCE",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "lab_results_raw.csv",
+						"folderPath": "adls_lab_result_manual",
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_ADLS_DATASOURCE')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_ADLS_sink_db_trial_subjects')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_clinical_poc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat('db_trial_subjects_', formatDateTime(utcNow(),'yyyyMMdd_HHmmss'), '.csv')",
+							"type": "Expression"
+						},
+						"folderPath": "db_trial_subjects",
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_adls_clinical_poc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_MySQL_source_db_trial_subjects')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_mysql_local",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "MySqlTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "`db_trial_subjects`"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_mysql_local')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_Rest_clinical_api_source')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_rest_clinical_api_poc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": "/api/adverse-events"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_rest_clinical_api_poc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_adls_clinical_api_sink')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_clinical_poc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "api_adverse_events",
+						"fileSystem": "bronze"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_adls_clinical_poc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/clinical-poc-synapse-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('clinical-poc-synapse-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/clinical-poc-synapse-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('clinical-poc-synapse-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_ADLS_DATASOURCE')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_ADLS_DATASOURCE_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_adls_clinical_poc')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_adls_clinical_poc_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_adls_clinical_poc_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_mysql_local')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "MySql",
+				"typeProperties": {
+					"server": "[parameters('ls_mysql_local_properties_typeProperties_server')]",
+					"port": 3306,
+					"database": "[parameters('ls_mysql_local_properties_typeProperties_database')]",
+					"username": "[parameters('ls_mysql_local_properties_typeProperties_username')]",
+					"sslMode": 0,
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('ls_mysql_local_password')]"
+					},
+					"driverVersion": "v2"
+				},
+				"connectVia": {
+					"referenceName": "IR-LocalMachine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-LocalMachine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_rest_clinical_api_poc')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('ls_rest_clinical_api_poc_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": false,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/IR-LocalMachine')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create External Table')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- A) Use (or create) a DB for your external tables\nCREATE DATABASE clinical_gold;\nUSE clinical_gold;\n\n--Master Key\nCREATE MASTER KEY ENCRYPTION \nBY PASSWORD = 'abc123@';\n\n-- B) Let this DB use the workspace Managed Identity to access ADLS\nCREATE DATABASE SCOPED CREDENTIAL ADLS_MI\nWITH IDENTITY = 'Managed Identity';\n\n-- C) Point to your ADLS Gen2 Gold container (no keys in code)\nCREATE EXTERNAL DATA SOURCE ADLS_GOLD\nWITH (\n    LOCATION   = 'abfss://gold@adlsclinicalpoc.dfs.core.windows.net',\n    CREDENTIAL = ADLS_MI\n);\n\n-- D) Parquet file format\nCREATE EXTERNAL FILE FORMAT format_parquet\nWITH\n(\n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n)\n\nCREATE EXTERNAL TABLE gold.subject_risk_summary\n(\n    subject_id             VARCHAR(100),\n    arm                    VARCHAR(100),\n    num_high_results       INT,\n    num_low_results        INT,\n    num_adverse_events     INT,\n    num_serious_events     INT,\n    avg_ae_duration        FLOAT,\n    num_severe_events      INT,\n    num_recovered_events    INT,\n    num_not_recovered_events INT,\n    num_recovering          INT,\n    Preferred_term_diversity  INT,\n    sex   varchar(20),\n    country varchar(100),\n    total_clinical_events  INT\n)\nWITH (\n    LOCATION    = '/subject_risk_summary/',   -- folder in gold container\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);    \n\n\n-- Demographics\nCREATE EXTERNAL TABLE gold.demographics_summary\n(\n    arm      VARCHAR(100),\n    sex      VARCHAR(50),\n    country  VARCHAR(100),\n    [count]  BIGINT\n)\nWITH (\n    LOCATION    = '/demographics_summary/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n-- Lab efficiency\nCREATE EXTERNAL TABLE gold.lab_efficiency\n(\n    test_name                 VARCHAR(200),\n    avg_collection_delay_days FLOAT,\n    avg_result_delay_days     FLOAT\n)\nWITH (\n    LOCATION    = '/lab_efficiency/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n-- AE summary\nCREATE EXTERNAL TABLE gold.ae_summary\n(\n    arm       VARCHAR(100),\n    severity  VARCHAR(50),\n    ae_count  BIGINT\n)\nWITH (\n    LOCATION    = '/ae_summary/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n-- Efficacy change (example)\nCREATE EXTERNAL TABLE gold.efficacy_change_all\n(\n    subject_id  VARCHAR(100),\n    test_name varchar(50),\n    arm         VARCHAR(100),\n    min_result  FLOAT,\n    max_result  FLOAT,\n    [change]    FLOAT\n)\nWITH (\n    LOCATION    = '/efficacy_change/',\n    DATA_SOURCE = ADLS_GOLD,\n    FILE_FORMAT = ParquetFormat\n);\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "clinical_gold",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create Views Gold')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "USE clinical_gold;\nGO\n\n\ndROP VIEW gold.subject_risk_summary ;\nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'subject_risk_summary',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- Demographics summary\nDROP VIEW gold.demographics_summary \nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'demographics_summary',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- Lab efficiency\nDROP VIEW gold.lab_efficiency \nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'lab_efficiency',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- AE summary\nDROP VIEW gold.ae_summary \nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'ae_summary',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- Efficacy change\nDROP VIEW gold.efficacy_change_all\nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'efficacy_change',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "clinical_gold",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Gold Schema')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- Subject risk summary\nCREATE SCHEMA gold;\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "clinical_gold",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		}
+	]
+}
