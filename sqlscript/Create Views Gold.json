@@ -1,0 +1,17 @@
+{
+	"name": "Create Views Gold",
+	"properties": {
+		"content": {
+			"query": "USE clinical_gold;\nGO\n\n\ndROP VIEW gold.subject_risk_summary ;\nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'subject_risk_summary',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- Demographics summary\nDROP VIEW gold.demographics_summary \nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'demographics_summary',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- Lab efficiency\nDROP VIEW gold.lab_efficiency \nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'lab_efficiency',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- AE summary\nDROP VIEW gold.ae_summary \nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'ae_summary',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;\n\n-- Efficacy change\nDROP VIEW gold.efficacy_change_all\nAS\nSELECT *\nFROM OPENROWSET(\n    BULK 'efficacy_change',\n    DATA_SOURCE = 'ADLS_GOLD',\n    FORMAT = 'PARQUET'\n) AS src;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "clinical_gold",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"name": "Gold Schema",
+	"properties": {
+		"content": {
+			"query": "-- Subject risk summary\nCREATE SCHEMA gold;\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "clinical_gold",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
