@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adf-clinical-poc"
 		},
+		"LS_AzureDatabricks_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'LS_AzureDatabricks'"
+		},
 		"ls_adls_clinical_poc_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'ls_adls_clinical_poc'"
@@ -14,6 +18,10 @@
 		"ls_mysql_local_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'ls_mysql_local'"
+		},
+		"LS_AzureDatabricks_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "1012-172738-ocalcask"
 		},
 		"ls_ADLS_DATASOURCE_properties_typeProperties_url": {
 			"type": "string",
@@ -69,6 +77,9 @@
 					"ls_adls_clinical_poc_accountKey": {
 						"value": "[parameters('ls_adls_clinical_poc_accountKey')]"
 					},
+					"LS_AzureDatabricks_accessToken": {
+						"value": "[parameters('LS_AzureDatabricks_accessToken')]"
+					},
 					"ls_mysql_local_password": {
 						"value": "[parameters('ls_mysql_local_password')]"
 					},
@@ -80,6 +91,9 @@
 					},
 					"ls_rest_clinical_api_poc_properties_typeProperties_url": {
 						"value": "[parameters('ls_rest_clinical_api_poc_properties_typeProperties_url')]"
+					},
+					"LS_AzureDatabricks_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('LS_AzureDatabricks_properties_typeProperties_existingClusterId')]"
 					},
 					"ls_mysql_local_properties_typeProperties_server": {
 						"value": "[parameters('ls_mysql_local_properties_typeProperties_server')]"
