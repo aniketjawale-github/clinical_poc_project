@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "MySQL_to_ADLSss",
+				"name": "MySQL_to_ADLS",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
