@@ -1,9 +1,0 @@
-{
-	"name": "adf-clinical-poc",
-	"location": "canadacentral",
-	"identity": {
-		"type": "SystemAssigned",
-		"principalId": "f3a889d2-ace3-4874-a0c1-18aaf95dfd9d",
-		"tenantId": "df11c652-ee8a-4152-bfe1-81d3852f426c"
-	}
-}
