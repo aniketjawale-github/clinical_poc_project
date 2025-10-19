@@ -1,0 +1,20 @@
+{
+	"name": "ds_adls_clinical_api_sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adls_clinical_poc",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "api_adverse_events",
+				"fileSystem": "bronze"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

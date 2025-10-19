@@ -1,0 +1,6 @@
+{
+	"name": "IR-LocalMachine",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}
