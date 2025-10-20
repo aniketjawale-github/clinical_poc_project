@@ -37,11 +37,10 @@ ADLS (CSV/JSON) ──────┘            │
                          ADLS Gen2 (Silver/Gold)
                                    ▼
                         Synapse (Serverless SQL)
-                                   ▼
-                              Power BI
+                                 
 ```
 
-> Add your architecture image at: `docs/architecture.png`
+
 
 ---
 
@@ -63,21 +62,16 @@ ADLS (CSV/JSON) ──────┘            │
 
 ```
 /README.md
-/docs/architecture.png               # (optional) exported diagram
-/data/
-  raw/                               # sample source files (CSV/JSON)
-  notebooks/                         # exported notebooks (ipynb/py)
+/docs/architecture.png               # (optional) exported diagram                       # exported notebooks (ipynb/py)
 /adf/
   linkedServices/                    # ARM/JSON
   datasets/
   pipelines/
 /databricks/
-  notebooks/
-  jobs/                              # job JSON exports (optional)
-/synapse/
-  sql/                               # external table & view scripts
-/powerbi/
-  reports/                           # PBIX or dataset JSON
+  notebooks/                          
+synapse/
+  sqlscripts/                               # external table & view scripts
+                        
 ```
 
 ---
