@@ -6,9 +6,9 @@
 
 ## 🚀 Quick Intro
 
-This POC simulates a pharma/clinical scenario (e.g., Abbott) by ingesting:
+This POC simulates a pharma/clinical scenario by ingesting:
 
-* **Azure SQL DB** (trial subjects),
+* **MySQL Database** (trial subjects),
 * **HTTP API** (Adverse Events via Azure Functions), and
 * **ADLS files** (LOINC‑coded Lab Results),
   then transforming in **Azure Databricks**, storing curated datasets in **ADLS**, exposing them via **Synapse Serverless**, and visualizing in **Power BI**.
